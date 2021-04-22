@@ -1,0 +1,2 @@
+# yqdata
+datasourse模块负责爬取来自丁香园的疫情数据，process模块在爬取数据时负责处理数据并存入数据库，yqdatashow模块负责展示疫情数据。
