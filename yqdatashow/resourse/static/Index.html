@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>疫情防控在线服务平台</title>
+    <script src="format/jquery-3.6.0.min.js"></script>
+    <script src="format/echarts.js"></script>
+    <script src="format/china.js"></script>
+    <script src="format/world.js"></script>
+    <script src="format/vue.js"></script>
+    <link rel="stylesheet" type="text/css" href="format/semantic.css">
+</head>
+
+<body>
+<div class="ui secondary menu" style="padding-top: 1em">
+    <div class="item">
+        疫情防控在线服务平台
+    </div>
+    <div class="right menu">
+        <i class="question circle icon" style="padding-top: 0.6em;"></i>
+        <div class="ui item" style="padding-left: 0.1em" data-tooltip="数据来源：来自腾讯新闻、丁香医生公开数据。检查阳性并不等于确诊病例，还有一部分被纳入无症状感染者。" data-position="bottom right">数据说明</div>
+    </div>
+</div>
+<div class="title">
+    <img src="img/bg.png" style="width: 100%;">
+</div>
+<div class="ui five item secondary menu" style="font-size: small;">
+    <a class="active item">
+        疫情地图
+    </a>
+    <!--中国地图，现存、累计；各省份数据，趋势图，境外输入饼状图，海外数据-->
+    <a class="item" href="gd.html">
+        城市专栏
+    </a>
+    <!--广东地图，各城市数据，出行政策-->
+    <a class="item">
+        实时动态
+    </a>
+    <!--国内信息，海外-->
+    <a class="item">
+        医疗信息
+    </a>
+    <!--医疗信息：发热门诊、新冠疫苗：接种点，疫苗介绍-->
+    <a class="item">
+        谣言澄清
+    </a>
+    <!--丁香谣言排行榜-->
+</div>
+<h1 class="ui header">
+    <div class="content">全国疫情整体情况 <div class="sub header">截至2021-04-02 9:25 国家卫健委数据统计</div>
+    </div>
+</h1>
+<div class="ui fluid container">
+    <table class="ui very basic collapsing celled table" style="text-align:center;width: 100%">
+        <tbody>
+        <tr>
+            <td>
+                <div class="ui orange statistic">
+                    <div class="label">较昨日:<div id="currentConfirmedIncr">1</div> </div>
+                    <div class="value">
+                        <div id="currentConfirmedCount">398</div>
+                    </div>
+                    <div class="label">现存确诊 </div>
+                </div>
+            </td>
+            <td>
+                <div class="ui orange statistic">
+                    <div class="label">较昨日:<div id="fromotherIncr">1</div> </div>
+                    <div class="value">
+                        <div id="fromother">5,305</div>
+                    </div>
+                    <div class="label">境外输入 </div>
+                </div>
+            </td>
+            <td>
+                <div class="ui yellow statistic">
+                    <div class="label">较昨日:<div id="suspectedIncr">1</div> </div>
+                    <div class="value">
+                        <div id="suspectedCount">295</div>
+                    </div>
+                    <div class="label">累计无症状 </div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div class="ui red statistic">
+                    <div class="label">较昨日:<div id="confirmedCountIncr">1</div> </div>
+                    <div class="value">
+                        <div id="confirmedCount">102,790</div>
+                    </div>
+                    <div class="label">累计确诊 </div>
+                </div>
+            </td>
+            <td>
+                <div class="ui green statistic">
+                    <div class="label">较昨日:<div id="curedIncr">1</div> </div>
+                    <div class="value">
+                        <div id="curedCount">97,541</div>
+                    </div>
+                    <div class="label">累计治愈 </div>
+                </div>
+            </td>
+            <td>
+                <div class="ui grey statistic">
+                    <div class="label">较昨日:<div id="deadIncr">1</div> </div>
+                    <div class="value">
+                        <div id="deadCount">4,851</div>
+                    </div>
+                    <div class="label">累计死亡 </div>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<br>
+<br>
+<h1 class="ui header">
+    <div class="content">全国疫情地图
+    </div>
+</h1>
+<div class="wrapper" style="width: 100%;height: 600px;display: grid;grid-template-columns: 60% 40%;">
+    <div id="map_all" style="width: 100%;height:600px;grid-column-start: 1;grid-column-end: 2" class="center"></div>
+    <div id="table_all" style="width: 100%;height:600px;grid-column-start: 2;grid-column-end: 3;overflow-x: auto; overflow-y: auto;" class="center">
+        <table class="ui very basic table" id="allprovincedata">
+            <thead>
+            <tr>
+                <th>地区</th>
+                <th>现存确诊</th>
+                <th>累计确诊</th>
+                <th>死亡</th>
+                <th>治愈</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for ="r in rows">
+                <td>{{r.provinceShortName}}</td>
+                <td>{{r.currentConfirmedCount}}</td>
+                <td>{{r.confirmedCount}}</td>
+                <td>{{r.deadCount}}</td>
+                <td>{{r.curedCount}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<br>
+<br>
+<h1 class="ui header">
+    <div class="content">疫情数据分析
+    </div>
+</h1>
+<br>
+<br>
+<div style="width: 100%;height: 600px;display: grid;grid-template-columns: 50% 50%;">
+    <div id="timeline" style="width: 100%;height:600px;grid-column-start: 1;grid-column-end: 2" class="center"></div>
+    <div id="pie" style="width: 100%;height:600px;grid-column-start: 2;grid-column-end: 3" class="center"></div>
+</div>
+<br>
+<br>
+<h1 class="ui header">
+    <div class="content">海外疫情
+    </div>
+</h1>
+<div class="ui fluid container">
+    <table id="countryall" class="ui very basic collapsing celled table" style="text-align:center;width: 100%">
+        <tbody>
+        <tr v-for ="r in rows">
+            <td>
+                <div class="ui orange statistic">
+                    <div class="value">
+                        {{r.currentConfirmedCount}}
+                    </div>
+                    <div class="label">现存确诊 </div>
+                </div>
+            </td>
+            <td>
+                <div class="ui red statistic">
+                    <div class="value">
+                        {{r.confirmedCount}}
+                    </div>
+                    <div class="label">累计确诊 </div>
+                </div>
+            </td>
+            <td>
+                <div class="ui green statistic">
+                    <div class="value">
+                        {{r.curedCount}}
+                    </div>
+                    <div class="label">累计治愈 </div>
+                </div>
+            </td>
+            <td>
+                <div class="ui grey statistic">
+                    <div class="value">
+                        {{r.deadCount}}
+                    </div>
+                    <div class="label">累计死亡 </div>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<br>
+<br>
+<div id="worldmap" style="width: 1500px;height:600px;" class="center"></div>
+<div class="ui horizontal divider">
+</div>
+<br>
+<div class="ui fluid container" style="height: 400px;overflow-x: auto; overflow-y: auto;">
+    <table class="ui very basic table" id="allcountrydata" style="text-align: center;width: 100%;">
+        <thead>
+        <tr>
+            <th>地区</th>
+            <th>国家</th>
+            <th>累计确诊</th>
+            <th>累计治愈</th>
+            <th>累计死亡</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for ="r in rows">
+            <td>{{r.continents}}</td>
+            <td>{{r.countryName}}</td>
+            <td>{{r.confirmedCount}}</td>
+            <td>{{r.curedCount}}</td>
+            <td>{{r.deadCount}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<br>
+<br>
+<div class="ui horizontal divider">
+    ------E N D------
+</div>
+<br>
+<br>
+</body>
+<!--integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="-->
+<!--crossorigin="anonymous"-->
+
+
+
+<script type="text/javascript">
+
+    /*--------------------全国统计数据-----------------------------*/
+    /*现存确诊病例较昨日增长*/
+    $.getJSON("http://localhost:8080/covid/getCurrentConfirmedIncr",function (data) {
+        //var count = data
+        var map = data.data
+        $("#currentConfirmedIncr").html(map)
+    })
+
+    /*现存确诊*/
+    $.getJSON("http://localhost:8080/covid/getCurrentConfirmedCount",function (data) {
+        //var count = data
+        var map = data.data
+        $("#currentConfirmedCount").html(map)
+    })
+
+    /*境外输入较昨日变化*/
+    $.getJSON("http://localhost:8080/covid/getFromOtherIncr",function (data) {
+        //var count = data
+        var map = data.data
+        $("#fromotherIncr").html(map)
+    })
+
+    /*境外输入*/
+    $.getJSON("http://localhost:8080/covid/getFromOther",function (data) {
+        //var count = data
+        var map = data.data
+        $("#fromother").html(map)
+    })
+
+    /*无症状较昨日变化*/
+    $.getJSON("http://localhost:8080/covid/getSuspectedIncr",function (data) {
+        //var count = data
+        var map = data.data
+        $("#suspectedIncr").html(map)
+    })
+
+    /*无症状*/
+    $.getJSON("http://localhost:8080/covid/getSuspectedCount",function (data) {
+        //var count = data
+        var map = data.data
+        $("#suspectedCount").html(map)
+    })
+
+    /*累计确诊较昨日变化*/
+    $.getJSON("http://localhost:8080/covid/getConfirmedCountIncr",function (data) {
+        //var count = data
+        var map = data.data
+        $("#confirmedCountIncr").html(map)
+    })
+
+    /*累计确诊*/
+    $.getJSON("http://localhost:8080/covid/getConfirmedCount",function (data) {
+        //var count = data
+        var map = data.data
+        $("#confirmedCount").html(map)
+    })
+
+    /*治愈较昨日*/
+    $.getJSON("http://localhost:8080/covid/getCuredIncr",function (data) {
+        //var count = data
+        var map = data.data
+        $("#curedIncr").html(map)
+    })
+
+    /*累计治愈*/
+    $.getJSON("http://localhost:8080/covid/getCuredCount",function (data) {
+        //var count = data
+        var map = data.data
+        $("#curedCount").html(map)
+    })
+
+    /*死亡较昨日变化*/
+    $.getJSON("http://localhost:8080/covid/getDeadIncr",function (data) {
+        //var count = data
+        var map = data.data
+        $("#deadIncr").html(map)
+    })
+
+    /*累计死亡*/
+    $.getJSON("http://localhost:8080/covid/getDeadCount",function (data) {
+        //var count = data
+        var map = data.data
+        $("#deadCount").html(map)
+    })
+
+    /*------------------------------全国地图----------------------------*/
+    var dataList=[
+        {name: '北京', value: 100},
+        {name: '上海', value: randomValue()}
+    ]
+    var myMapChart = echarts.init(document.getElementById('map_all'));
+    function randomValue() {
+        return Math.round(Math.random()*1000);
+    }
+    myMapChart.setOption({
+        title: {},
+        tooltip: {
+            formatter:function(params,ticket, callback){
+                return params.seriesName+'<br />'+params.name+'：'+params.value
+            }
+        },
+        visualMap: {
+            min: 0,
+            max: 1500,
+            left: 'left',
+            top: 'bottom',
+            text: ['多','少'],
+            inRange: {
+                color: ['#ffe5bf', '#ffa372', '#ff7e86','#ee1216','#B22222']
+            },
+            show:true
+        },
+        geo: {
+            map: 'china',
+            roam: true,//不开启缩放和平移
+            zoom:1.23,//视角缩放比例
+            label: {
+                normal: {
+                    show: true,
+                    fontSize:'10',
+                    color: 'rgba(0,0,0,0.7)'
+                }
+            },
+            itemStyle: {
+                normal:{
+                    borderColor: 'rgba(0, 0, 0, 0.2)'
+                },
+                emphasis:{
+                    areaColor: '#AEEEEE',//鼠标悬停区域颜色
+                    shadowOffsetX: 0,
+                    shadowOffsetY: 0,
+                    shadowBlur: 20,
+                    borderWidth: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+            }
+        },
+        series : [
+            {
+                name: '累计确诊',
+                type: 'map',
+                geoIndex: 0,
+                data:dataList
+
+            }
+        ]
+    });
+
+    setTimeout(function () {
+        // 异步加载json格式数据
+        $.getJSON('http://localhost:8080/covid/getNationalMapData', function(data) {
+            myMapChart.setOption({
+                series: [{
+                    data: data.data
+                }]
+            });
+        });
+    }, 1000)
+
+    /*----------------------------省份数据-------------------------*/
+    $.getJSON("http://localhost:8080/covid/getProvinceData",function (data) {
+        var v = new Vue({
+            el:'#allprovincedata',
+            data:{
+                rows:data.data
+            }
+        })
+    })
+
+    /*----------------------------境外输入饼状图-------------------------*/
+    var myPieChart = echarts.init(document.getElementById("pie"));
+    myPieChart.setOption({
+        title: {
+            text:'各地区境外输入'
+        },
+        tooltip: {
+            trigger: 'item',
+            formatter: '{a} <br/>{b} : {c} ({d}%)'
+        },
+        legend: {
+            type: 'scroll',
+            orient: 'vertical',
+            right: 10,
+            top: 20,
+            bottom: 20,
+        },
+        series : [
+            {
+                name: '境外输入',
+                type: 'pie',    // 设置图表类型为饼图
+                radius: '70%',  // 饼图的半径
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                },
+                data:[          // 数据数组，name 为数据项名称，value 为数据项值
+                    {value:5, name:'a'},
+                    {value:4, name:'b'},
+                    {value:3, name:'c'},
+                    {value:2, name:'d'},
+                    {value:1, name:'e'}
+                ]
+            }
+        ]
+    })
+    $.getJSON('http://localhost:8080/covid/getImportData', function (data) {
+        myPieChart.setOption({
+            series:[{
+                data: data.data
+            }]
+        })
+    })
+
+    /*----------------------------每天数据折线-------------------------*/
+    var myLineChart = echarts.init(document.getElementById("timeline"));
+    myLineChart.setOption({
+        title: {
+            text:'国内疫情趋势'
+        },
+        tooltip: {
+            trigger: 'axis'
+        },
+        legend: {
+            data: ['新增确诊', '累计确诊', '疑似病例', '累计治愈', '累计死亡']
+        },
+        dataset: {
+            // 这里指定了维度名的顺序，从而可以利用默认的维度到坐标轴的映射。
+            dimensions: ['dateId', '新增确诊', '累计确诊', '疑似病例', '累计治愈', '累计死亡'],
+            source: []
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        toolbox: {
+            feature: {}
+        },
+        xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: []
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {type: 'line'},
+            {type: 'line'},
+            {type: 'line'},
+            {type: 'line'},
+            {type: 'line'}
+        ]
+    });
+
+
+    var xdata2 = [];//x轴
+    $.getJSON('http://localhost:8080/covid/getTimeData', function (data) {
+        var arr = data.data
+        for (var i = 0; i < arr.length; i++) {
+            xdata2.push(arr[i].dateId)
+        }
+        myLineChart.setOption({
+            dataset: {
+                source: data.data
+            },
+            xAxis: {
+                data: xdata2
+            }
+        })
+    })
+
+    /*----------------------------海外数据汇总-------------------------*/
+    $.getJSON("http://localhost:8080/covid/getAllCountryData",function (data) {
+        var v = new Vue({
+            el:'#countryall',
+            data:{
+                rows:data.data
+            }
+        })
+    })
+
+    /*----------------------------海外数据-------------------------*/
+    $.getJSON("http://localhost:8080/covid/getCountryData",function (data) {
+        var v = new Vue({
+            el:'#allcountrydata',
+            data:{
+                rows:data.data
+            }
+        })
+    })
+
+    /*------------------------------全球地图----------------------------*/
+    var dataList2=[
+        {name: 'China', value: 100},
+        {name: 'Australia', value: 200}
+    ]
+    var worldChart = echarts.init(document.getElementById('worldmap'));
+    worldChart.setOption({
+        title: {
+            text:'全球累计确诊'
+        },
+        tooltip: {
+            formatter:function(params,ticket, callback){
+                return params.seriesName+'<br />'+params.name+'：'+params.value
+            }
+        },
+        visualMap: {
+            min: 20,
+            max: 31000000,
+            left: 'left',
+            top: 'bottom',
+            text: ['多','少'],
+            inRange: {
+                color: ['#ffe5bf', '#ffa372', '#ff7e86','#ee1216','#B22222']
+            },
+            show:true
+        },
+        geo: {
+            map: 'world',
+            roam: true,//不开启缩放和平移
+            zoom:1.23,//视角缩放比例
+            label: {
+                normal: {
+                    show: true,
+                    fontSize:'10',
+                    color: 'rgba(0,0,0,0.7)'
+                }
+            },
+            itemStyle: {
+                normal:{
+                    borderColor: 'rgba(0, 0, 0, 0.2)'
+                },
+                emphasis:{
+                    areaColor: '#AEEEEE',//鼠标悬停区域颜色
+                    shadowOffsetX: 0,
+                    shadowOffsetY: 0,
+                    shadowBlur: 20,
+                    borderWidth: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+            }
+        },
+        series : [
+            {
+                name: '累计确诊',
+                type: 'map',
+                geoIndex: 0,
+                data:dataList2
+
+            }
+        ]
+    });
+
+    setTimeout(function () {
+        // 异步加载json格式数据
+        $.getJSON('http://localhost:8080/covid/getWorldMapData', function(data) {
+            worldChart.setOption({
+                series: [{
+                    data: data.data
+                }]
+            });
+        });
+    }, 1000)
+</script>
+
+<script src="format/semantic.js"></script>
+
+</html>
